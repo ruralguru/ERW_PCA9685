@@ -1,0 +1,57 @@
+#######################################
+# Syntax Coloring Map: ERW_PCA9685
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+ERW_PCA9685 KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin KEYWORD2
+mode KEYWORD2
+prescale KEYWORD2
+setPWM KEYWORD2
+LED_State KEYWORD2
+
+#######################################
+# Structures (KEYWORD3)
+#######################################
+
+PCA9685_PWM KEYWORD3
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+PCA9685_MODE1 LITERAL1
+PCA9685_MODE2 LITERAL1
+
+PCA9685_SUBADR1 LITERAL1
+PCA9685_SUBADR2 LITERAL1
+PCA9685_SUBADR3 LITERAL1
+PCA9685_ALLCALL LITERAL1
+
+LED0_ON_L LITERAL1
+LED0_ON_H LITERAL1
+LED0_OFF_L LITERAL1
+LED0_OFF_H LITERAL1
+
+ALLLED_ON_L LITERAL1
+ALLLED_ON_H LITERAL1
+ALLLED_OFF_L LITERAL1
+ALLLED_OFF_H LITERAL1
+
+PCA9685_PRESCALE LITERAL1
+PCA9685_TEST LITERAL1
+
+PCA9685_LED_FULL_ON LITERAL1
+PCA9685_LED_FULL_OFF LITERAL1
+
+#######################################
+# ? (LITERAL2)
+#######################################
