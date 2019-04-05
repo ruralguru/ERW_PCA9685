@@ -29,9 +29,6 @@ Editor: Earl R. Watkins II Title: ERW_PCA9685.h Date: 03/28/2019
 
 #include "ERW_PCA9685.h"
 
-
-LED_ON_OFF_REG LED_ON_OFF[16];
-
 /**
  * @brief ERW_PCA9685 Contructor for the PCA9685.
  * @param addr is the I2C address to be used for device.
@@ -56,7 +53,6 @@ int8_t ERW_PCA9685::begin()
   PCA9685_I2C->begin();
   restart();
   delay(10);
-  I2C_write(PCA9685_MODE1, temp_mode);
   PCA9685_device_mode = I2C_read(PCA9685_MODE1);
   PCA9685_device_mode = PCA9685_device_mode & PCA9685_AUTOINC_BIT;
   I2C_write(PCA9685_MODE1 ,PCA9685_device_mode);
@@ -64,7 +60,7 @@ int8_t ERW_PCA9685::begin()
   PCA9685_drive_mode = I2C_read(PCA9685_MODE2);
   if(PCA9685_device_mode == 0)
   {
-    returnVar == -1
+    returnVar == -1;
   }
   PCA9685_I2C->beginTransmission(PCA9685_addr);
   PCA9685_I2C->write(ALLLED_ON_L);
@@ -76,11 +72,11 @@ int8_t ERW_PCA9685::begin()
   uint8_t tempRead = I2C_read(ALLLED_OFF_H);
   if(tempRead != 0x10)
   {
-    returnVar == -1
+    returnVar == -1;
   }
   else
   {
-    PCA9685_LED_State = 0;
+    PCA9685_LED_state = 0;
   }
   return returnVar;
 }
@@ -99,7 +95,7 @@ int8_t ERW_PCA9685::PMW_freq(float desiredFrequency)
   temp_prescale /= 4096;
   temp_prescale /= desiredFrequency;
   temp_prescale -= 1;
-  uint8_t prescale = floor(prescaleval + 0.5);
+  uint8_t prescale = floor(temp_prescale + 0.5);
   sleep();
   I2C_write(PCA9685_PRESCALE, prescale);
   restart();
@@ -135,7 +131,7 @@ void ERW_PCA9685::set_brightness(uint16_t (&PCA9685_brightness)[16])
     {
       if( indexValue == 0)
       {
-        temp_offset = 0
+        temp_offset = 0;
       }
       else
       {
@@ -161,7 +157,7 @@ void ERW_PCA9685::set_brightness(uint16_t (&PCA9685_brightness)[16])
           temp_offset -= PCA9685_DEFAULT_MAX;
         }
         split_uint16(temp_offset, high_byte, low_byte);
-        high_byte = high_byte & 0x0F
+        high_byte = high_byte & 0x0F;
         ALL_LED_ON_OFF_REG[indexValue].LED_OFF_H_REG = high_byte;
         ALL_LED_ON_OFF_REG[indexValue].LED_OFF_L_REG = low_byte;
       }
@@ -210,12 +206,12 @@ void ERW_PCA9685::LED_state(uint16_t LED_State)
  *                       Can only be unset with a power cycle.
  * @param ClockFreq Input the Clock Frequency that is used.
  */
-void ERW_PCA968::external_clock(float ClockFreq)
+void ERW_PCA9685::external_clock(float ClockFreq)
 {
   uint8_t temp_mode = 0;
   temp_mode = PCA9685_device_mode | PCA9685_EXTCLK_BIT;
   PCA9685_clock_frequency = ClockFreq;
-  sleep(void)
+  sleep();
   I2C_write(PCA9685_MODE1, temp_mode);
   PCA9685_device_mode = I2C_read(PCA9685_MODE1);
 }
@@ -223,7 +219,7 @@ void ERW_PCA968::external_clock(float ClockFreq)
 /**
  *@brief restart is used to wake the device from sleep.
  */
-void ERW_PCA968::restart(void)
+void ERW_PCA9685::restart(void)
 {
   uint8_t temp_mode = 0;
   I2C_write(PCA9685_MODE1, PCA9685_RESTART_BIT);
@@ -233,7 +229,7 @@ void ERW_PCA968::restart(void)
 /**
  *@brief sleep is used to put the device to sleep.
  */
-void ERW_PCA968::sleep(void)
+void ERW_PCA9685::sleep(void)
 {
   uint8_t temp_mode = 0;
   temp_mode = PCA9685_device_mode | PCA9685_SLEEP_BIT;
@@ -246,7 +242,7 @@ void ERW_PCA968::sleep(void)
  * @brief The Auto Increment function allows the user to iderate through
  *        registers without needing to state the register.
  */
-void ERW_PCA968::auto_increment(void)
+void ERW_PCA9685::auto_increment(void)
 {
   uint8_t temp_mode = 0;
   temp_mode = PCA9685_device_mode & PCA9685_AUTOINC_BIT;
@@ -266,7 +262,7 @@ void ERW_PCA968::auto_increment(void)
  * @brief This function sets the device's response to the subaddresses and all call address.
  * @param response_byte is used to set the sub adress responses
  */
-int8_t ERW_PCA968::alternative_address_response(uint8_t response_byte)
+int8_t ERW_PCA9685::alternative_address_response(uint8_t response_byte)
 {
   int8_t returnVar = 0;
   if (response_byte & 0xF0)
@@ -292,7 +288,7 @@ int8_t ERW_PCA968::alternative_address_response(uint8_t response_byte)
  * @param  mode The Mode is set to drive the LEDs as desired.
  * @return      If the register isn't set as it was requested -1 is returned.
  */
-int8_t ERW_PCA968::drive_mode(uint8_t mode)
+int8_t ERW_PCA9685::drive_mode(uint8_t mode)
 {
   int8_t returnVar = 0;
   I2C_write(PCA9685_MODE2, mode);
@@ -309,7 +305,7 @@ int8_t ERW_PCA968::drive_mode(uint8_t mode)
  * @param  I2C_reg The register to be read from
  * @return         Value read from the register
  */
-uint8_t ERW_PCA968::I2C_read(uint8_t I2C_reg)
+uint8_t ERW_PCA9685::I2C_read(uint8_t I2C_reg)
 {
   PCA9685_I2C->beginTransmission(PCA9685_addr);
   PCA9685_I2C->write(I2C_reg);
@@ -323,7 +319,7 @@ uint8_t ERW_PCA968::I2C_read(uint8_t I2C_reg)
  * @param I2C_reg The register desired to be written to.
  * @param data    The byte of data to be written to the register.
  */
-void ERW_PCA968::I2C_write(uint8_t I2C_reg, uint8_t data)
+void ERW_PCA9685::I2C_write(uint8_t I2C_reg, uint8_t data)
 {
   PCA9685_I2C->beginTransmission(PCA9685_addr);
   PCA9685_I2C->write(I2C_reg);
@@ -337,7 +333,7 @@ void ERW_PCA968::I2C_write(uint8_t I2C_reg, uint8_t data)
  * @param high_byte [description]
  * @param low_byte  [description]
  */
-void split_uint16(uint16_t toSplit, uint8_t high_byte, uint8_t low_byte)
+void ERW_PCA9685::split_uint16(uint16_t toSplit, uint8_t high_byte, uint8_t low_byte)
 {
   low_byte = uint8_t(toSplit);
   high_byte = uint8_t(toSplit >> 8);
