@@ -30,12 +30,40 @@ Editor: Earl R. Watkins II Title: ERW_PCA9685.h Date: 03/28/2019
 #include "ERW_PCA9685.h"
 
 /**
+ * @brief ERW_PCA9685 Contructor for the PCA9685's allcall address.
+ *                    No inputs needed. sets up everything to default.
+ */
+ERW_PCA9685::ERW_PCA9685(int n_outputEnable)
+{
+  PCA9685_n_outputEnable = n_outputEnable;
+  PCA9685_LEDs_used = 16;
+  PCA9685_addr = 0xE0;
+  PCA9685_clock_frequency = PCA9685_DEFAULT_CLOCK;
+  PCA9685_response_byte = 0;
+}
+
+/**
  * @brief ERW_PCA9685 Contructor for the PCA9685.
  * @param addr is the I2C address to be used for device.
  * @param LEDsUsed are the number of LED's used.
  */
 ERW_PCA9685::ERW_PCA9685(uint8_t addr, uint8_t LEDsUsed)
 {
+  PCA9685_LEDs_used = LEDsUsed;
+  PCA9685_addr = addr;
+  PCA9685_clock_frequency = PCA9685_DEFAULT_CLOCK;
+  PCA9685_response_byte = 0;
+}
+
+/**
+ * @brief ERW_PCA9685 Contructor for the PCA9685.
+ * @param addr is the I2C address to be used for device.
+ * @param LEDsUsed are the number of LED's used.
+ * @param n_outputenable controls the full IC.
+ */
+ERW_PCA9685::ERW_PCA9685(uint8_t addr, uint8_t LEDsUsed, int n_outputEnable)
+{
+  PCA9685_n_outputEnable = n_outputEnable;
   PCA9685_LEDs_used = LEDsUsed;
   PCA9685_addr = addr;
   PCA9685_clock_frequency = PCA9685_DEFAULT_CLOCK;
@@ -224,6 +252,20 @@ void ERW_PCA9685::restart(void)
   uint8_t temp_mode = 0;
   I2C_write(PCA9685_MODE1, PCA9685_RESTART_BIT);
   PCA9685_device_mode = I2C_read(PCA9685_MODE1);
+}
+
+void ERW_PCA9685::toggleIC(void)
+{
+  if( PCA9685_n_outputEnable_State )
+  {
+    digitalWrite(PCA9685_n_outputEnable, LOW);
+    PCA9685_n_outputEnable_State = 0;
+  }
+  else
+  {
+    digitalWrite(PCA9685_n_outputEnable, HIGH);
+    PCA9685_n_outputEnable_State = 1;
+  }
 }
 
 /**

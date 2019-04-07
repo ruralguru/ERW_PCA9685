@@ -31,7 +31,7 @@ Editor: Earl R. Watkins II Title: ERW_PCA9685.h Date: 03/28/2019
 #define ERW_PCA9685_h
 
 #include <Arduino.h>
-#include <stdint.h>
+//#include <stdint.h>
 #include <Wire.h>
 
 #define PCA9685_MODE1 		0x00
@@ -87,13 +87,16 @@ class ERW_PCA9685
 	public: //Can be called upon.
 
 	//Public Functions
+		ERW_PCA9685(uint8_t addr, uint8_t LEDsUsed, int n_outputEnable);
 		ERW_PCA9685(uint8_t addr, uint8_t LEDsUsed);
+		ERW_PCA9685(int n_outputenable);
 		int8_t begin(void);
 		int8_t PMW_freq(float desiredFrequency);
 		void set_brightness(uint16_t (&PCA9685_brightness)[16]);
 		void LED_state(uint16_t LED_State);
 		void external_clock(float ClockFreq);
 		void restart(void);
+		void toggleIC(void);
 		void sleep(void);
 		int8_t alternative_address_response(uint8_t response_byte);
 		int8_t drive_mode(uint8_t mode);
@@ -107,6 +110,8 @@ class ERW_PCA9685
 	void auto_increment(void);
 	//Private Variables
 
+		int PCA9685_n_outputEnable;
+		uint8_t PCA9685_n_outputEnable_State;
 		uint8_t PCA9685_addr;
 		uint8_t PCA9685_device_mode;
 		uint8_t PCA9685_drive_mode;
@@ -127,7 +132,5 @@ class ERW_PCA9685
 	  };
 
 struct LED_ON_OFF_REG ALL_LED_ON_OFF_REG[16];
-
-
 };
 #endif
