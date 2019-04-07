@@ -22,9 +22,6 @@ Editor: Earl R. Watkins II Title: ERW_PCA9685.h Date: 03/28/2019
 	Notes:
 
 	Based on: Adafruit library for 16-channel PWM & Servo driver
-
-	This example code uses the "beerware" license. Use it, modify it, and/or reference it.
-	If you find it useful, buy me an ice cold tasty beverage someday.
 */
 
 #ifndef ERW_PCA9685_h
