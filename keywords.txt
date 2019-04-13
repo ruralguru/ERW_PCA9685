@@ -22,6 +22,7 @@ toggleIC	KEYWORD2
 sleep KEYWORD2
 alternative_address_response	KEYWORD2
 drive_mode	KEYWORD2
+setSerialOut  KEYWORD2
 
 #######################################
 # Structures (KEYWORD3)

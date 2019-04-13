@@ -28,8 +28,9 @@ Editor: Earl R. Watkins II Title: ERW_PCA9685.h Date: 03/28/2019
 #define ERW_PCA9685_h
 
 #include <Arduino.h>
-//#include <stdint.h>
 #include <Wire.h>
+
+//#define SERIAL_DEBUG
 
 #define PCA9685_MODE1 		0x00
 #define PCA9685_MODE2 		0x01
@@ -103,7 +104,7 @@ class ERW_PCA9685
 	//Private Functions
 	uint8_t I2C_read(uint8_t I2C_reg);
 	void I2C_write(uint8_t I2C_reg, uint8_t data);
-	void split_uint16(uint16_t toSplit, uint8_t high, uint8_t low);
+	void split_uint16(uint16_t toSplit, uint8_t &high, uint8_t &low);
 	void auto_increment(void);
 	//Private Variables
 

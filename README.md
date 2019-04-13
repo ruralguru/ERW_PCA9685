@@ -21,8 +21,8 @@ Documentation
 --------------
 
 * **[Installing an Arduino Library Guide](https://learn.sparkfun.com/tutorials/installing-an-arduino-library)** - Basic information on how to install an Arduino library.
-* **[Product Repository]-TBA-
-* **[Hookup Guide](https://www.mouser.com/datasheet/2/302/PCA9685-1127478.pdf) - Basic hookup guide for the PCA9685 Use page 6.
+* **[Product Repository](https://www.adafruit.com/product/815)** - The Adafruit breakout board for easy breadboarding.
+* **[Hookup Guide](https://www.mouser.com/datasheet/2/302/PCA9685-1127478.pdf)** - Basic hookup guide for the PCA9685 Use page 6.
 
 
 License Information
