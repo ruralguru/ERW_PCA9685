@@ -87,7 +87,7 @@ class ERW_PCA9685
 		ERW_PCA9685(uint8_t addr, uint8_t LEDsUsed, int n_outputEnable);
 		ERW_PCA9685(uint8_t addr, uint8_t LEDsUsed);
 		ERW_PCA9685(int n_outputenable);
-		int8_t begin(void);
+		int8_t begin(uint8_t drive_mode);
 		int8_t PMW_freq(float desiredFrequency);
 		void set_brightness(uint16_t (&PCA9685_brightness)[16]);
 		void LED_state(uint16_t LED_State);
