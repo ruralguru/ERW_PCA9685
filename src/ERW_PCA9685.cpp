@@ -33,12 +33,12 @@ Editor: Earl R. Watkins II Title: ERW_PCA9685.h Date: 03/28/2019
  */
 ERW_PCA9685::ERW_PCA9685(uint8_t addr, uint8_t LEDsUsed)
 {
-  PCA9685_LEDs_used = LEDsUsed;
-  PCA9685_addr = addr;
-  PCA9685_clock_frequency = PCA9685_DEFAULT_CLOCK;
-  PCA9685_response_byte = 0;
-  PCA9685_I2C = &Wire;
-  PCA9685_device_mode = PCA9685_ALLCALL_BIT | PCA9685_AUTOINC_BIT;
+  PCA9685_LEDs_used = LEDsUsed; /* Stores LED count for use in other functions */
+  PCA9685_addr = addr; /* Stores I2C address for later */
+  PCA9685_clock_frequency = PCA9685_DEFAULT_CLOCK; /* The default internal clock frequency is 25Mhz. */
+  PCA9685_I2C = &Wire; /*sets up I2C pointer*/
+  PCA9685_device_mode = PCA9685_ALLCALL_BIT | PCA9685_AUTOINC_BIT; /* Sets autoincrement so all 4 registers per LED can be set at once. Also listens on allcall.*/
+  PCA9685_n_outputEnable_State = 2; /* Starts in unsettable state to determine if not set */
 }
 
 /**
@@ -49,16 +49,15 @@ ERW_PCA9685::ERW_PCA9685(uint8_t addr, uint8_t LEDsUsed)
  */
 ERW_PCA9685::ERW_PCA9685(uint8_t addr, uint8_t LEDsUsed, int n_outputEnable)
 {
-  PCA9685_n_outputEnable = n_outputEnable;
-  PCA9685_LEDs_used = LEDsUsed;
-  PCA9685_addr = addr;
-  PCA9685_clock_frequency = PCA9685_DEFAULT_CLOCK;
-  PCA9685_response_byte = 0;
+  PCA9685_n_outputEnable = n_outputEnable; /* Stores OE pin number for use toggling using class function.*/
+  PCA9685_LEDs_used = LEDsUsed; /* Stores LED count for use in other functions */
+  PCA9685_addr = addr; /* Stores I2C address for later */
+  PCA9685_clock_frequency = PCA9685_DEFAULT_CLOCK; /* The default internal clock frequency is 25Mhz. */
   PCA9685_I2C = &Wire;
-  PCA9685_device_mode = PCA9685_ALLCALL_BIT | PCA9685_AUTOINC_BIT;
-  pinMode(PCA9685_n_outputEnable, OUTPUT);
-  digitalWrite(PCA9685_n_outputEnable, HIGH);
-  PCA9685_n_outputEnable_State = 0;
+  PCA9685_device_mode = PCA9685_ALLCALL_BIT | PCA9685_AUTOINC_BIT; /* Sets autoincrement so all 4 registers per LED can be set at once. Also listens on allcall.*/
+  pinMode(PCA9685_n_outputEnable, OUTPUT); /* Sets OE pin as an output for use inside class */
+  digitalWrite(PCA9685_n_outputEnable, HIGH); /* Sets Pin high to turn off LEDs */
+  PCA9685_n_outputEnable_State = 0; /* stores this off state as being off */
 }
 
 /**
@@ -70,10 +69,9 @@ int8_t ERW_PCA9685::begin(uint8_t drive_mode)
 {
   int8_t returnVar = 0;
   uint8_t tempDevice = 0;
-  PCA9685_I2C->begin();
+  PCA9685_I2C->begin(); /* I2C begin */
   restart();
   PCA9685_device_mode = PCA9685_device_mode | PCA9685_ALLCALL_BIT | PCA9685_AUTOINC_BIT;
-
   I2C_write(PCA9685_MODE1 ,PCA9685_device_mode);
   tempDevice = PCA9685_device_mode;
   PCA9685_device_mode = I2C_read(PCA9685_MODE1);
@@ -106,38 +104,55 @@ int8_t ERW_PCA9685::begin(uint8_t drive_mode)
   {
     PCA9685_LED_state = 0;
   }
-  // if(Serial)
-  // {
-  //   Serial.println("Mode Settings: ");
-  //   Serial.print("\tDevice: ");
-  //   Serial.print(tempDevice, HEX);
-  //   Serial.print(" -> ");
-  //   Serial.print(PCA9685_device_mode, HEX);
-  //   Serial.print("\tDrive: ");
-  //   Serial.print(drive_mode, HEX);
-  //   Serial.print(" -> ");
-  //   Serial.print(PCA9685_drive_mode, HEX);
-  //   Serial.print("\tDriver State: ");
-  //   Serial.println(PCA9685_LED_state, HEX);
-  //
-  //   Serial.println("Initial LED Reads: ");
-  //   for(uint8_t indexValue = 0; indexValue < PCA9685_LEDs_used; indexValue++)
-  //   {
-  //     Serial.print("\t");
-  //     Serial.print(indexValue);
-  //     Serial.print(": 0x");
-  //     uint8_t tempPrintVal = I2C_read(LED0_ON_L+4*indexValue);
-  //     Serial.print(tempPrintVal);
-  //     tempPrintVal = I2C_read( (LED0_ON_L+4*indexValue) + 1);
-  //     Serial.print(tempPrintVal);
-  //     Serial.print(", 0x");
-  //     tempPrintVal = I2C_read( (LED0_ON_L+4*indexValue) + 2);
-  //     Serial.print(tempPrintVal);
-  //     tempPrintVal = I2C_read( (LED0_ON_L+4*indexValue) + 3);
-  //     Serial.print(tempPrintVal);
-  //   }
-  //   Serial.println();
-  // }
+  #ifdef SERIAL_DEBUG
+    Serial.println("Constructor Settings: ");
+    Serial.print("\tLEDs used: ");
+    Serial.print(PCA9685_LEDs_used);
+    Serial.print("\tI2C Address: 0x");
+    Serial.print(PCA9685_addr, HEX);
+    Serial.print("\tDevice: 0x");
+    Serial.print(PCA9685_device_mode, HEX);
+    if(PCA9685_n_outputEnable_State == 2)
+    {
+      Serial.print("\tOE pin: -N/A-");
+      Serial.println("\tOE state: -N/A-");
+    }
+    else
+    {
+      Serial.print("\tOE pin: ");
+      Serial.println(PCA9685_n_outputEnable);
+      Serial.print("\tOE state: ");
+      Serial.println(PCA9685_n_outputEnable_State);
+    }
+    Serial.println("Mode Settings: ");
+    Serial.print("\tDevice: ");
+    Serial.print(tempDevice, HEX);
+    Serial.print(" -> ");
+    Serial.print(PCA9685_device_mode, HEX);
+    Serial.print("\tDrive: ");
+    Serial.print(drive_mode, HEX);
+    Serial.print(" -> ");
+    Serial.print(PCA9685_drive_mode, HEX);
+    Serial.print("\tDriver State: ");
+    Serial.println(PCA9685_LED_state, HEX);
+    Serial.println("Initial LED Reads: ");
+    for(uint8_t indexValue = 0; indexValue < PCA9685_LEDs_used; indexValue++)
+    {
+      Serial.print("\t");
+      Serial.print(indexValue);
+      Serial.print(": 0x");
+      uint8_t tempPrintVal = I2C_read(LED0_ON_L+4*indexValue);
+      Serial.print(tempPrintVal, HEX);
+      tempPrintVal = I2C_read( (LED0_ON_L+4*indexValue) + 1);
+      Serial.print(tempPrintVal, HEX);
+      Serial.print(", 0x");
+      tempPrintVal = I2C_read( (LED0_ON_L+4*indexValue) + 2);
+      Serial.print(tempPrintVal, HEX);
+      tempPrintVal = I2C_read( (LED0_ON_L+4*indexValue) + 3);
+      Serial.print(tempPrintVal, HEX);
+    }
+    Serial.println();
+  #endif
 
   return returnVar;
 }
@@ -164,14 +179,12 @@ int8_t ERW_PCA9685::PMW_freq(float desiredFrequency)
   PCA9685_device_mode = I2C_read(PCA9685_MODE1);
   holder_prescale = I2C_read(PCA9685_PRESCALE);
 
-  // if(Serial)
-  // {
-  //   Serial.print("\t Prescaler: ");
-  //   Serial.print(prescale, HEX);
-  //   Serial.print(" -> ");
-  //   Serial.print(holder_prescale, HEX);
-  //   Serial.println();
-  // }
+  #ifdef SERIAL_DEBUG
+    Serial.print("\t Prescaler: ");
+    Serial.print(prescale, HEX);
+    Serial.print(" -> ");
+    Serial.println(holder_prescale, HEX);
+  #endif
 
   if (prescale != holder_prescale)
   {
@@ -193,10 +206,9 @@ void ERW_PCA9685::set_brightness(uint16_t (&PCA9685_brightness)[16])
   uint8_t high_byte = 0;
   uint8_t low_byte = 0;
   uint16_t temp_offset = 0;
-  // if(Serial)
-  // {
-  //   Serial.println("LED Periods");
-  // }
+  #ifdef SERIAL_DEBUG
+    Serial.println("LED Periods (Start -> Stop)");
+  #endif
   for(uint8_t indexValue = 0; indexValue < PCA9685_LEDs_used; indexValue++)
   {
     if( PCA9685_brightness[indexValue] == 0 )
@@ -217,11 +229,12 @@ void ERW_PCA9685::set_brightness(uint16_t (&PCA9685_brightness)[16])
         temp_offset = ( ( PCA9685_DEFAULT_RESOLUTION / PCA9685_LEDs_used ) * indexValue ) - 1;
       }
       split_uint16(temp_offset, high_byte, low_byte);
+
       high_byte == high_byte & 0x0F;
       if( PCA9685_brightness[indexValue] >= PCA9685_DEFAULT_MAX )
       {
-        /* The Full On bit is set. The offset value is also used to stagger the on sequence. */
-        ALL_LED_ON_OFF_REG[indexValue].LED_ON_H_REG = high_byte | 0x10;
+
+        ALL_LED_ON_OFF_REG[indexValue].LED_ON_H_REG = high_byte | 0x10;  /* When the Full On bit is setonly full off matters */
         ALL_LED_ON_OFF_REG[indexValue].LED_ON_L_REG = low_byte;
         ALL_LED_ON_OFF_REG[indexValue].LED_OFF_H_REG = 0;
         ALL_LED_ON_OFF_REG[indexValue].LED_OFF_L_REG = 0;
@@ -241,21 +254,20 @@ void ERW_PCA9685::set_brightness(uint16_t (&PCA9685_brightness)[16])
         ALL_LED_ON_OFF_REG[indexValue].LED_OFF_L_REG = low_byte;
       }
     }
-    // if(Serial)
-    // {
-    //   Serial.print("\t");
-    //   Serial.print(indexValue);
-    //   Serial.print(": 0x");
-    //   Serial.print(ALL_LED_ON_OFF_REG[indexValue].LED_ON_H_REG, HEX);
-    //   Serial.print(ALL_LED_ON_OFF_REG[indexValue].LED_ON_L_REG, HEX);
-    //   Serial.print(", 0x");
-    //   Serial.print(ALL_LED_ON_OFF_REG[indexValue].LED_OFF_H_REG, HEX);
-    //   Serial.print(ALL_LED_ON_OFF_REG[indexValue].LED_OFF_L_REG, HEX);
-    //   if(indexValue >= ( PCA9685_LEDs_used - 1 ) )
-    //   {
-    //     Serial.println();
-    //   }
-    // }
+    #ifdef SERIAL_DEBUG
+      Serial.print("\t");
+      Serial.print(indexValue);
+      Serial.print(": 0x");
+      Serial.print(ALL_LED_ON_OFF_REG[indexValue].LED_ON_H_REG, HEX);
+      Serial.print(ALL_LED_ON_OFF_REG[indexValue].LED_ON_L_REG, HEX);
+      Serial.print("-> 0x");
+      Serial.print(ALL_LED_ON_OFF_REG[indexValue].LED_OFF_H_REG, HEX);
+      Serial.print(ALL_LED_ON_OFF_REG[indexValue].LED_OFF_L_REG, HEX);
+      if(indexValue >= ( PCA9685_LEDs_used - 1 ) )
+      {
+        Serial.println();
+      }
+    #endif
   }
 }
 
@@ -268,13 +280,11 @@ void ERW_PCA9685::LED_state(uint16_t LED_State)
   uint16_t LED_state_changed;
   LED_state_changed = PCA9685_LED_state ^ LED_State;
   PCA9685_LED_state = LED_State;
-  // if(Serial)
-  // {
-  //
-  //   Serial.print("LEDs Changed: B");
-  //   Serial.print(LED_state_changed, BIN);
-  //   Serial.println("\tLEDs Set:");
-  // }
+  #ifdef SERIAL_DEBUG
+    Serial.print("LEDs Changed: ");
+    Serial.print(LED_state_changed, BIN);
+    Serial.println("\tLEDs Set: (index: START -> STOP)");
+  #endif
   for(uint8_t indexValue = 0; indexValue < PCA9685_LEDs_used; indexValue++)
   {
     if( bitRead(LED_state_changed, indexValue) )
@@ -301,40 +311,43 @@ void ERW_PCA9685::LED_state(uint16_t LED_State)
         PCA9685_I2C->write(0x10);
         PCA9685_I2C->endTransmission();
       }
-      // if(Serial)
-      // {
-      //   Serial.print("\t");
-      //   Serial.print(indexValue);
-      //   Serial.print(": 0x");
-      //   uint8_t tempPrintVal = I2C_read(LED0_ON_L+4*indexValue);
-      //   Serial.print(tempPrintVal);
-      //   tempPrintVal = I2C_read( (LED0_ON_L+4*indexValue) + 1);
-      //   Serial.print(tempPrintVal);
-      //   Serial.print(", 0x");
-      //   tempPrintVal = I2C_read( (LED0_ON_L+4*indexValue) + 2);
-      //   Serial.print(tempPrintVal);
-      //   tempPrintVal = I2C_read( (LED0_ON_L+4*indexValue) + 3);
-      //   Serial.print(tempPrintVal);
-      // }
+    #ifdef SERIAL_DEBUG
+      Serial.print("\t");
+      Serial.print(indexValue);
+      Serial.print(": 0x");
+      uint8_t tempPrintVal = I2C_read( (LED0_ON_L+4*indexValue) + 1);
+      Serial.print(tempPrintVal, HEX);
+      tempPrintVal = I2C_read(LED0_ON_L+4*indexValue);
+      Serial.print(tempPrintVal, HEX);
+      Serial.print("-> 0x");
+      tempPrintVal = I2C_read( (LED0_ON_L+4*indexValue) + 3);
+      Serial.print(tempPrintVal, HEX);
+      tempPrintVal = I2C_read( (LED0_ON_L+4*indexValue) + 2);
+      Serial.print(tempPrintVal, HEX);
+      if( indexValue >= ( PCA9685_LEDs_used - 1) )
+      {
+        Serial.println();
+      }
+    #endif
     }
   }
-  // if(Serial)
-  // {
-  //   Serial.println();
-  // }
 }
 
 /**
  * @brief external_clock sets the device to use external clock.
  *                       Can only be unset with a power cycle.
+ *                       TODO: test and flush out.
  * @param ClockFreq Input the Clock Frequency that is used.
  */
 void ERW_PCA9685::external_clock(float ClockFreq)
 {
+  /* TODO: test and flush out */
   uint8_t temp_mode = 0;
   temp_mode = PCA9685_device_mode | PCA9685_EXTCLK_BIT;
   PCA9685_clock_frequency = ClockFreq;
   sleep();
+  I2C_write(PCA9685_MODE1, temp_mode);
+  restart();
   I2C_write(PCA9685_MODE1, temp_mode);
   PCA9685_device_mode = I2C_read(PCA9685_MODE1);
 }
@@ -360,12 +373,10 @@ void ERW_PCA9685::toggleIC(void)
     digitalWrite(PCA9685_n_outputEnable, LOW);
     PCA9685_n_outputEnable_State = 1;
   }
-
-  if(Serial)
-  {
+  #ifdef SERIAL_DEBUG
     Serial.print("Driver State: ");
     Serial.println(PCA9685_n_outputEnable_State);
-  }
+  #endif
 }
 
 /**
@@ -375,7 +386,6 @@ void ERW_PCA9685::sleep(void)
 {
   uint8_t temp_mode = 0;
   temp_mode =  PCA9685_SLEEP_BIT;
-
   I2C_write(PCA9685_MODE1, temp_mode);
 }
 
@@ -397,10 +407,21 @@ void ERW_PCA9685::auto_increment(void)
   }
   I2C_write(PCA9685_MODE1, temp_mode);
   PCA9685_device_mode = I2C_read(PCA9685_MODE1);
+  #ifdef SERIAL_DEBUG
+    if(PCA9685_device_mode & PCA9685_AUTOINC_BIT)
+    {
+      Serial.println("Auto Increment has been set.");
+    }
+    else
+    {
+      Serial.println("Auto Increment has been unset.");
+    }
+  #endif
 }
 
 /**
- * @brief This function sets the device's response to the subaddresses and all call address.
+ * @brief alternative_address_response sets the device's response to the subaddresses and all call address.
+ *        TODO: Needs complete testing.
  * @param response_byte is used to set the sub adress responses
  */
 int8_t ERW_PCA9685::alternative_address_response(uint8_t response_byte)
@@ -424,7 +445,7 @@ int8_t ERW_PCA9685::alternative_address_response(uint8_t response_byte)
 }
 
 /**
- * @brief This function is used to set the drive mode of the device.
+ * @brief Drive Mode is used to set the drive mode of the device.
  *        See section 7.3.2 of the datasheet for details.
  * @param  mode The Mode is set to drive the LEDs as desired.
  * @return      If the register isn't set as it was requested -1 is returned.
@@ -440,6 +461,11 @@ int8_t ERW_PCA9685::drive_mode(uint8_t mode)
   }
   return returnVar;
 }
+
+/**
+ * @ brief setSerialOut defines the SERIAL_DEBUG state
+ * @param state 0 for off 1 for on
+ */
 
 /**
  * @brief This function is used to read a register.
@@ -474,7 +500,7 @@ void ERW_PCA9685::I2C_write(uint8_t I2C_reg, uint8_t data)
  * @param high_byte [description]
  * @param low_byte  [description]
  */
-void ERW_PCA9685::split_uint16(uint16_t toSplit, uint8_t high_byte, uint8_t low_byte)
+void ERW_PCA9685::split_uint16(uint16_t toSplit, uint8_t &high_byte, uint8_t &low_byte)
 {
   low_byte = uint8_t(toSplit);
   high_byte = uint8_t(toSplit >> 8);
